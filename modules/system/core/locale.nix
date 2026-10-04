@@ -23,11 +23,6 @@
         LC_TIME = "fr_FR.UTF-8";
       };
     };
-    services.xserver.xkb = {
-      enable = true;
-      layout = "fr";
-      variant = "";
-    };
     console.keyMap = "fr";
   };
 }

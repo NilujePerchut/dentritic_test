@@ -12,7 +12,7 @@
         osdevmDiskConfiguration
         core
 	nix-ld
-	desktop
+	#desktop
       ];
   };
 }

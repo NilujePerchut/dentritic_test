@@ -18,7 +18,6 @@
       enable = true;
     };
 
-    services.printing.enable = true;
     services.dbus = {
       enable = true;
       packages = [ pkgs.dconf ];
@@ -29,6 +28,12 @@
       pkgs.nerd-fonts.noto
       pkgs.nerd-fonts.iosevka
     ];
+
+    services.xserver.xkb = {
+      enable = true;
+      layout = "fr";
+      variant = "";
+    };
 
     services.printing.enable = true;
 
