@@ -14,6 +14,7 @@
       nix
       locale
       hosts
+      audio
     ];
   in {
     imports = modules;

@@ -5,9 +5,6 @@
 }: {
   flake.nixosModules.desktop = moduleWithSystem ({pkgs, ...}: let
     modules = with self.nixosModules; [
-      core
-      network
-      audio
       gnome
     ];
     in {
@@ -30,7 +27,6 @@
     ];
 
     services.xserver.xkb = {
-      enable = true;
       layout = "fr";
       variant = "";
     };

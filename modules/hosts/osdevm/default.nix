@@ -12,6 +12,7 @@
         osdevmDiskConfiguration
         core
 	nix-ld
+        network
 	#desktop
       ];
   };

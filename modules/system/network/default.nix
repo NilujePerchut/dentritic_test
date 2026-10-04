@@ -1,7 +1,7 @@
 {moduleWithSystem, ...}: {
   flake.nixosModules.network = moduleWithSystem ({...}: {config, ...}: {
     networking = {
-      networkingmanager = {
+      networkmanager = {
         enable = true;
         dns = "none";
       };

@@ -11,12 +11,8 @@
     boot = {
       loader = {
         timeout = 2;
-        efi = {
-          canTouchEfiVariables = true;
-        };
-        systemd-boot = {
-          enable = true;
-        };
+        efi.canTouchEfiVariables = true;
+        systemd-boot.enable = true;
       };
       kernelPackages = pkgs.linuxPackages_latest;
     initrd.availableKernelModules = [ "ata_piix" "ohci_pci" "ehci_pci" "ahci" "sd_mod" "sr_mod" ];
