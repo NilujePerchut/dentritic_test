@@ -13,7 +13,7 @@
         core
 	nix-ld
         network
-	#desktop
+	desktop
       ];
   };
 }
