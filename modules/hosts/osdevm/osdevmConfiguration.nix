@@ -1,5 +1,5 @@
 {...}: {
-  flake.nixosModules.osdevmConfiguration = {pkgs, ...}: {
+  flake.nixosModules.osdevmConfiguration = {pkgs, lib, ...}: {
     networking = {
       hostName = "osdevm";
     };

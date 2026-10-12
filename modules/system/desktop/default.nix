@@ -3,13 +3,15 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.desktop = moduleWithSystem ({pkgs, ...}: let
+  flake.nixosModules.desktop = moduleWithSystem ({pkgs, lib, ...}: let
     modules = with self.nixosModules; [
       gnome
     ];
     in {
+    imports = modules;
+
     # Enable opengl
-    hardware.graphics.enable = true;
+    #hardware.graphics.enable = true;
 
     services.displayManager.gdm = {
       enable = true;
@@ -34,5 +36,7 @@
     services.printing.enable = true;
 
     security.polkit.enable = true;
+
+    services.hardware.bolt.enable = true;
   });
 }

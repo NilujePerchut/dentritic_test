@@ -19,6 +19,7 @@
           "wheel"
           "plugdev"
           "dialout"
+	  "networkmanager"
         ];
       };
     };
