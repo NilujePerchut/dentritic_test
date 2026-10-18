@@ -22,6 +22,7 @@
       desktop
       nvim
       zsh
+      git
     ]);
   };
 }
