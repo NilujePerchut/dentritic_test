@@ -9,7 +9,7 @@
     ...
   }: let
     modules = with self.nixosModules; [
-      user
+      user-niluje
       bootloader
       nix
       locale
