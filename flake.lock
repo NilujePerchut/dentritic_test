@@ -54,6 +54,22 @@
         "type": "github"
       }
     },
+    "niluje-configs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1788282766,
+        "narHash": "sha256-AjwAPs61kGUckKkua9gTK7I/tstavzv/dptOFUCxiE8=",
+        "owner": "NilujePerchut",
+        "repo": "configs",
+        "rev": "8aaa2818b374597e1d8ce6594773abe23734825d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NilujePerchut",
+        "repo": "configs",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1792030654,
@@ -90,6 +106,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "import-tree": "import-tree",
+        "niluje-configs": "niluje-configs",
         "nixpkgs": "nixpkgs"
       }
     }

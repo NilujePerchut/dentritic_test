@@ -13,6 +13,12 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # personnal config
+    niluje-configs = {
+      url = "github:NilujePerchut/configs";
+      flake = false;
+    };
   };
 
   outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree ./modules);

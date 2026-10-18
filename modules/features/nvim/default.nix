@@ -1,5 +1,6 @@
 {
   self,
+  inputs,
   moduleWithSystem,
   ...
 }: {
@@ -19,13 +20,11 @@
     ];
 
     home-manager.users.niluje = {
-      programs.neovim = {
-        enable = true;
-	extraLuaConfig = ''
-          vim.opt.number = true
-          vim.opt.relativenumber = true
-        '';
+      xdg.configFile."nvim" = {
+        source = "${inputs.niluje-configs}/nvim";
+        recursive = true;
       };
+      programs.neovim.enable = true;
     };
   });
 }
