@@ -47,6 +47,6 @@
     users.defaultUserShell = pkgs.zsh;
     programs.zsh.enable = true;
 
-    system.stateVersion = "26.02";
+    system.stateVersion = "26.05";
   };
 }
