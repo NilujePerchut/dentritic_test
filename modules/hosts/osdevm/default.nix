@@ -21,6 +21,7 @@
       network
       desktop
       nvim
+      zsh
     ]);
   };
 }
