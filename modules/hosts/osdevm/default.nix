@@ -20,9 +20,7 @@
       nix-ld
       network
       desktop
-      nvim
-      zsh
-      git
+      cli-utils
     ]);
   };
 }
