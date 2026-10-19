@@ -6,6 +6,7 @@
   flake.nixosModules.desktop = moduleWithSystem ({pkgs, lib, ...}: let
     modules = with self.nixosModules; [
       gnome
+      term_emu
     ];
     in {
     imports = modules;
