@@ -10,6 +10,8 @@
       nvim
       zsh
       git
+      zellij
+      tmux
     ];
 
     environment.systemPackages = with pkgs; [
