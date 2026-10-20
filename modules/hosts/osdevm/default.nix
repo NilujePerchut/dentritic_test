@@ -22,6 +22,7 @@
       desktop
       desktop-apps
       cli-utils
+      prog
     ]);
   };
 }
