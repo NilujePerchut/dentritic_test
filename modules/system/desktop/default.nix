@@ -7,6 +7,7 @@
     modules = with self.nixosModules; [
       gnome
       term_emu
+      browsers
     ];
     in {
     imports = modules;
