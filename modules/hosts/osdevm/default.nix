@@ -23,6 +23,7 @@
       desktop-apps
       cli-utils
       prog
+      elec
     ]);
   };
 }
