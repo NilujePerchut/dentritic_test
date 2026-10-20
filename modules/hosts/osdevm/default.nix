@@ -20,6 +20,7 @@
       nix-ld
       network
       desktop
+      desktop-apps
       cli-utils
     ]);
   };
