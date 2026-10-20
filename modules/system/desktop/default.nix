@@ -3,7 +3,7 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.desktop = moduleWithSystem ({pkgs, lib, ...}: let
+  flake.nixosModules.desktop = moduleWithSystem ({pkgs, lib, config, ...}: let
     modules = with self.nixosModules; [
       gnome
       term_emu
@@ -12,8 +12,10 @@
     in {
     imports = modules;
 
+    myConfig.desktop.enable = true;
+
     # Enable opengl
-    #hardware.graphics.enable = true;
+    hardware.graphics.enable = true;
 
     services.displayManager.gdm = {
       enable = true;

@@ -9,6 +9,7 @@
     ...
   }: let
     modules = with self.nixosModules; [
+      params
       user-niluje
       bootloader
       nix
