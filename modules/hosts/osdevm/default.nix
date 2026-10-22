@@ -18,6 +18,7 @@
       osdevmDiskConfiguration
       core
       power
+      bluetooth
       nix-ld
       network
       desktop
