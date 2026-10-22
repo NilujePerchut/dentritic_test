@@ -17,6 +17,7 @@
       osdevmConfiguration
       osdevmDiskConfiguration
       core
+      power
       nix-ld
       network
       desktop
@@ -24,6 +25,11 @@
       cli-utils
       prog
       elec
-    ]);
+    ]) ++ [{
+      myConfig.power = {
+        enable = true;
+        cpuVendor = "intel";
+      };
+    }];
   };
 }
