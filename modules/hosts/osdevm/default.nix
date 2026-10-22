@@ -26,6 +26,7 @@
       cli-utils
       prog
       elec
+      games
     ]) ++ [{
       myConfig.power = {
         enable = true;
