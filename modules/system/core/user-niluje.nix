@@ -14,7 +14,6 @@
       isNormalUser = true;
       description = "niluje";
       extraGroups = [
-        "root"
         "wheel"
         "plugdev"
         "dialout"
