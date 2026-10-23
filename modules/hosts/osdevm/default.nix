@@ -27,6 +27,7 @@
       prog
       elec
       games
+      print3d
     ]) ++ [{
       myConfig.power = {
         enable = true;
