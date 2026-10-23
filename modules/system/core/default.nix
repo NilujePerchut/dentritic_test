@@ -37,6 +37,9 @@
       zsh
     ];
 
+    # Needed to avoid problems in ssh sessions
+    environment.enableAllTerminfo = true;
+
     # Setup neaovim as default editor
     programs.neovim.enable = true;
     programs.neovim.defaultEditor = true;
