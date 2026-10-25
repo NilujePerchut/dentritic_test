@@ -160,6 +160,12 @@
           ];
         };
 
+        systemd.tmpfiles.rules =
+          map (d: "d ${d.mountPoint} 0755 ${toString cfg.pool.uid} ${toString cfg.pool.gid} -")
+            cfg.dataDisks
+          ++ map (p: "d ${p} 0755 ${toString cfg.pool.uid} ${toString cfg.pool.gid} -")
+               cfg.parityDisks;
+
         environment.etc."snapraid.conf".text = ''
           ${lib.concatStringsSep "\n" parityLines}
           ${diskLines}
