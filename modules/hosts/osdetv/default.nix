@@ -23,6 +23,7 @@
         network
         cli-utils
         nas
+        samba
       ]);
   };
 }

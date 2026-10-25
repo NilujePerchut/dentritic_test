@@ -33,5 +33,19 @@
           lanCidr = "192.168.40.0/24";
         };
       };
+
+      smb = {
+        enable = true;
+        workgroup = "WORKGROUP";
+        serverString = "osdetv";
+        shares = {
+          partage = {
+            path = "/mnt/mergerfs/partage";
+            owner = "niluje";
+            group = "users";
+            validUsers = ["niluje"];
+          };
+        };
+      };
     });
 }
