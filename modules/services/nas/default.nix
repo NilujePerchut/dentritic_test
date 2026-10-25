@@ -233,6 +233,25 @@
           net_config_full_access = ${if cfg.snapraidd.fullConfigAccess then "1" else "0"}
           sys_log_retention_days = 120
           net_web_root = ${snapraidd}/share/snapraidd/commander.zip
+
+          # == Native maintenance : sync → scrub → rapport ──
+          maintenance_schedule = ${cfg.snapraidd.maintenance.schedule}
+          scrub_percentage = ${toString cfg.snapraidd.maintenance.scrubPercentage}
+          scrub_older_than = ${toString cfg.snapraidd.maintenance.scrubOlderThan}
+          ${lib.optionalString cfg.snapraidd.maintenance.prehash "sync_prehash = 1"}
+          ${lib.optionalString cfg.snapraidd.maintenance.preventTruncations "sync_prevent_truncations = 1"}
+
+          # == SMART continuous checks ==
+          probe_interval_minutes = ${toString cfg.snapraidd.smart.probeMinutes}
+          ${lib.optionalString (cfg.snapraidd.smart.ignore != [])
+            "sys_smartignore = ${lib.concatStringsSep ", " cfg.snapraidd.smart.ignore}"}
+
+          # == Notifications ==
+          notify_result_level = ${cfg.snapraidd.notify.resultLevel}
+          ${lib.optionalString (cfg.snapraidd.notify.resultCmd != null)
+            "notify_result = ${cfg.snapraidd.notify.resultCmd}"}
+          ${lib.optionalString (cfg.snapraidd.notify.startCmd != null)
+            "notify_start = ${cfg.snapraidd.notify.startCmd}"}
         '';
 
         systemd.services.snapraidd = lib.mkIf cfg.snapraidd.enable {
