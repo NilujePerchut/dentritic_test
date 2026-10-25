@@ -119,10 +119,62 @@
             default = true;
             description = "Full access to the config UI";
           };
+
+          maintenance = {
+            schedule = lib.mkOption {
+              type = lib.types.str;
+              default = "02:00";
+              description = "Check window sync+scrub+rapport (HH:MM ou 'Mon 03:00, Thu 04:00')";
+            };
+            scrubPercentage = lib.mkOption {
+              type = lib.types.float;
+              default = 0.7;
+              description = "Array fraction checked by scrub after each sync (0 = scrub disabled)";
+            };
+            scrubOlderThan = lib.mkOption {
+              type = lib.types.int;
+              default = 10;
+              description = "Do not scrub blocs earlier than N days";
+            };
+            prehash = lib.mkEnableOption "sync with --prehash";
+            preventTruncations = lib.mkEnableOption "sync abort files that are truncated to 0";
+          };
+
+          smart = {
+            probeMinutes = lib.mkOption {
+              type = lib.types.int;
+              default = 3;
+              description = "SMART check period (0 = disabled)";
+            };
+            ignore = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [];
+              example = ["* Spin_Up_Time Raw_Read_Error_Rate"];
+              description = "SMART Attributs ignored per disk ('*' = all)";
+            };
+          };
+
+          notify = {
+            resultLevel = lib.mkOption {
+              type = lib.types.enum ["info" "warning" "error" "critical"];
+              default = "warning";
+              description = "notify_result lower level trigger";
+            };
+            resultCmd = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Result command (placeholders %s %l %n %t %h %c, on stdin) — ex: curl ntfy";
+            };
+            startCmd = lib.mkOption {
+              type = lib.types.nullOr lib.types.str;
+              default = null;
+              description = "Start command";
+            };
+          };
         };
 
         syncTimer = {
-          enable = lib.mkEnableOption "SnapRAID sync Timer (défaut: off)";
+          enable = lib.mkEnableOption "SnapRAID sync Timer (default: off)";
 
           schedule = lib.mkOption {
             type = lib.types.str;
