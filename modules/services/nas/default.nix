@@ -27,7 +27,7 @@
         version = "2.1";
         src = pkgs.fetchzip {
           url = "https://github.com/amadvance/snapraid-daemon/releases/download/v2.1/snapraid-daemon-2.1.tar.gz";
-          sha256 = "sha256-laHPsFEqtkHtorT7Z+b4Par5oPETqkqPfAsYKCMqJqE=";
+          sha256 = "sha256-e3uLEGbEP44j/aXhe1uqDc0N6+UQu092mF0XGcrLP1s=";
         };
         buildInputs = [pkgs.zip];
         configureFlags = [
