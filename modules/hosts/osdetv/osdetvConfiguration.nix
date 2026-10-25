@@ -34,7 +34,7 @@
         };
       };
 
-      smb = {
+      services.smb = {
         enable = true;
         workgroup = "WORKGROUP";
         serverString = "osdetv";
