@@ -29,7 +29,7 @@
         snapraidd = {
           enable = true;
           port = 7627;
-          listenAddresses = ["192.168.40.66:7627"];
+          listenAll = true;
           lanCidr = "192.168.40.0/24";
         };
       };

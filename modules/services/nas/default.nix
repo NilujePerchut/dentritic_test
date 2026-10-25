@@ -45,8 +45,9 @@
       mountUnit = mp: "${builtins.replaceStrings ["/"] ["-"] mp}.mount";
       allMounts = (map (d: d.mountPoint) cfg.dataDisks) ++ cfg.parityDisks;
 
-      listenLine = "net_port = " + builtins.concatStringsSep ","
-        (["127.0.0.1:${toString cfg.snapraidd.port}"] ++ cfg.snapraidd.listenAddresses);
+      listenLine = if cfg.snapraidd.listenAll
+        then "net_port = ${toString cfg.snapraidd.port}"
+        else "net_port = 127.0.0.1:${toString cfg.snapraidd.port}";
 
       parityLines = lib.imap1 (i: p: "${if i == 1 then "parity" else "${toString i}-parity"} ${p}/snapraid.parity") cfg.parityDisks;
       diskLines = lib.concatStringsSep "\n" (lib.imap1 (i: d: "d${toString i} ${d.mountPoint}") cfg.dataDisks);
@@ -101,11 +102,10 @@
             description = "Snapraidd UI port";
           };
 
-          listenAddresses = lib.mkOption {
-            type = lib.types.listOf lib.types.str;
-            default = [];
-            example = ["192.168.40.66:7627"];
-            description = "Snapraidd listening ip address (IP:PORT) adresse. localhost is always valid";
+          listenAll = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Listen on all interfaces. localhost only otherwise";
           };
 
           lanCidr = lib.mkOption {
@@ -177,7 +177,7 @@
         environment.etc."snapraidd.conf".text = ''
           net_enabled = 1
           ${listenLine}
-          net_acl = +${cfg.snapraidd.lanCidr}
+          net_acl = +127.0.0.1,+${cfg.snapraidd.lanCidr}
           net_config_full_access = ${if cfg.snapraidd.fullConfigAccess then "1" else "0"}
           sys_log_retention_days = 120
           net_web_root = ${snapraidd}/share/snapraidd/commander.zip
@@ -195,7 +195,7 @@
             Restart = "on-failure";
             RestartSec = "5";
             PIDFile = "/run/snapraidd.pid";
-            ExecStart = "${snapraidd}/bin/snapraidd";
+            ExecStart = "${snapraidd}/bin/snapraidd -c /etc/snapraidd.conf -C /etc/snapraid.conf";
             ExecReload = "${pkgs.util-linux}/bin/kill -HUP $MAINPID";
             Nice = "19";
             IOSchedulingClass = "idle";
