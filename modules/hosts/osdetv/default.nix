@@ -24,6 +24,7 @@
         cli-utils
         nas
         samba
+        immich
       ]);
   };
 }
