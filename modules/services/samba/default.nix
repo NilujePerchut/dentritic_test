@@ -101,6 +101,15 @@
         };
       };
 
+      userOpts = {name, ...}: {
+        options = {
+          passwordFile = lib.mkOption {
+            type = lib.types.path;
+            description = "File containing the Samba password (e.g. a sops secret path)";
+          };
+        };
+      };
+
       shareSection = share: (
         {
           "path" = share.path;
@@ -165,6 +174,14 @@
           };
           description = "SMB shares, each key = share name";
         };
+
+        # Convention: one sops file per user, secrets/samba-<user>.sops.yaml,
+        # containing a single "password" key.
+        users = lib.mkOption {
+          type = lib.types.attrsOf (lib.types.submodule userOpts);
+          default = {};
+          description = "SMB users, each key = username";
+        };
       };
 
       config = lib.mkIf cfg.enable {
@@ -185,6 +202,15 @@
             // lib.mapAttrs (_: mkSection) cfg.shares;
         };
 
+        sops.secrets = lib.mapAttrs' (name: _:
+          lib.nameValuePair "samba-${name}" {
+            sopsFile = ../../../secrets/samba-${name}.sops.yaml;
+            key = "password";
+            # Re-apply the password whenever the secret changes
+            restartUnits = ["samba-passwords.service"];
+          }
+        ) cfg.users;
+
         services.samba-wsdd = lib.mkIf cfg.discover {
           enable = true;
           discovery = true;
@@ -202,6 +228,29 @@
               "d ${share.path} ${share.mode} ${share.owner} ${share.group} -")
           cfg.shares
         );
+
+        systemd.services.samba-passwords = lib.mkIf (cfg.users != {}) {
+          description = "Set Samba user passwords from secret files";
+          wantedBy = ["multi-user.target"];
+          after = ["sops-nix.service" "samba-setup.service"];
+          requires = ["sops-nix.service"];
+          serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            # Never leak the password in logs or temp files
+            UMask = "0077";
+          };
+          script = ''
+            set -euo pipefail
+          '' + lib.concatStringsSep "\n" (lib.mapAttrsToList
+            (name: user: let
+              smbpasswd = "${pkgs.samba4Full}/bin/smbpasswd";
+            in ''
+              pw="$(cat ${user.passwordFile})"
+              printf '%s\n%s\n' "$pw" "$pw" | ${smbpasswd} -s -a ${lib.escapeShellArg name}
+            '')
+            cfg.users);
+        };
       };
     });
 }

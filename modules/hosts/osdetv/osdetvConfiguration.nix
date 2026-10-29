@@ -4,7 +4,7 @@
 }: {
   flake.nixosModules.osdetvConfiguration =
     moduleWithSystem
-    ({...}: {pkgs, lib, ...}: {
+    ({...}: {config, pkgs, lib, ...}: {
       networking = {
         hostName = "osdetv";
         networkmanager.enable = true;
@@ -52,6 +52,8 @@
         enable = true;
         workgroup = "WORKGROUP";
         serverString = "osdetv";
+        # Samba password is provided by sops
+        users.niluje.passwordFile = config.sops.secrets."samba-niluje".path;
         shares = {
           partage = {
             path = "/mnt/mergerfs/partage";
