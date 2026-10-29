@@ -1,0 +1,25 @@
+# sops key hierarchy for the dentritic_test flake.
+# Each host derives its age key from its
+# SSH host key via ssh-to-age (see modules/sops for the key file location).
+
+keys:
+  - &admin age1wc7u3t6p5ed3runxxggsxatgpjsk853auqzul956tkrr9q50z93sxnyvah
+  - &osdetv age1t7s8czf39urrvkxd4eccfpt57fgru7m8xp5ezju8nt4qtsmmmuqqaykc2w
+  - &osdeplacard age1c5mg7z83yexy0jk3gtf4h6pmeuezfx5dc88g5r8l8lge5elg8qns5c0jdd
+
+creation_rules:
+  # Host private keys: encrypted for the admin only.
+  # A host must not be able to decrypt its own identity key (chicken-and-egg).
+  - path_regex: secrets/keys/.*\.sops\.yaml$
+    key_groups:
+      - age:
+          - *admin
+
+  # Application secrets: encrypted for the admin and every sops-enabled host.
+  # osdevm is deliberately excluded from this list.
+  - path_regex: secrets/.*\.sops\.yaml$
+    key_groups:
+      - age:
+          - *admin
+          - *osdetv
+          - *osdeplacard

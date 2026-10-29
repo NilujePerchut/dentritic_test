@@ -8,6 +8,7 @@
 
     modules =
       [
+        inputs.sops-nix.nixosModules.sops
         inputs.home-manager.nixosModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
@@ -22,6 +23,7 @@
         nix-ld
         network
         cli-utils
+        sops
         nas
         samba
         immich

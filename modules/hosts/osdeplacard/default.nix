@@ -7,6 +7,7 @@
     system = "x86_64-linux";
 
     modules = [
+      inputs.sops-nix.nixosModules.sops
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager.useGlobalPkgs = true;
@@ -21,6 +22,7 @@
       nix-ld
       network
       cli-utils
+      sops
     ]) ++ [{
       myConfig.power = {
         enable = true;
