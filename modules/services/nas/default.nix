@@ -22,6 +22,14 @@
         ];
       });
 
+      # Real ELF in a clean derivation: snapraidd spawns tasks without a
+      # shell and rejects shebang scripts; smartctl is compiled in as an
+      # absolute path (--with-smartctl above), so the wrapper's PATH tweak
+      # is redundant here.
+      snapraidElf = pkgs.runCommand "snapraid-elf" {} ''
+        install -Dm555 ${snapraidSmart}/bin/.snapraid-wrapped $out/bin/snapraid
+      '';
+
       snapraidd = pkgs.stdenv.mkDerivation {
         pname = "snapraidd";
         version = "2.1";
@@ -31,7 +39,13 @@
         };
         buildInputs = [pkgs.zip];
         configureFlags = [
-          "--with-snapraid=${snapraidSmart}/bin/snapraid"
+          # snapraidd's task spawner refuses shell-script binaries: its
+          # internal validation aborts with EINVAL as soon as it sees a
+          # shebang, without ever calling execve. The nixpkgs snapraid
+          # package wraps bin/snapraid in a bash script (smartmontools
+          # PATH), so we expose the real ELF at a stable path. A symlink
+          # won't do: the daemon opens the target with O_NOFOLLOW.
+          "--with-snapraid=${snapraidElf}/bin/snapraid"
         ];
         meta = with lib; {
           description = "SnapRAID daemon & web UI (REST API, job scheduler)";
@@ -50,8 +64,10 @@
         else "net_port = 127.0.0.1:${toString cfg.snapraidd.port}";
 
       parityLines = lib.imap1 (i: p: "${if i == 1 then "parity" else "${toString i}-parity"} ${p}/snapraid.parity") cfg.parityDisks;
-      diskLines = lib.concatStringsSep "\n" (lib.imap1 (i: d: "d${toString i} ${d.mountPoint}") cfg.dataDisks);
-      contentLines = builtins.concatStringsSep "\n"
+      # snapraid.conf syntax is `data <name> <path>`; a bare `d<N> <path>`
+      # is rejected with "Invalid command" and silently breaks every
+      # maintenance run.
+      diskLines = lib.concatStringsSep "\n" (lib.imap1 (i: d: "data d${toString i} ${d.mountPoint}") cfg.dataDisks);      contentLines = builtins.concatStringsSep "\n"
         ((map (d: "content ${d.mountPoint}/snapraid.content") cfg.dataDisks)
          ++ (lib.optional (cfg.parityDisks != []) "content ${lib.head cfg.parityDisks}/snapraid.content"));
     in {
