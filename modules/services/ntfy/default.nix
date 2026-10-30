@@ -8,23 +8,45 @@
     ({pkgs, ...}: {config, lib, ...}: let
       cfg = config.services.ntfy;
 
-      # Sender wrapper: topic as first argument, optional ntfy priority as
-      # second, message body on stdin. Reads the access token from the
-      # sops-decrypted file at runtime, so token rotation needs no restart.
-      ntfySend = pkgs.writeShellScriptBin "ntfy-send" ''
-        # Usage: ntfy-send <topic> [priority]   (body on stdin)
-        # Optional env: NTFY_TITLE, NTFY_TAG (used for snapraidd placeholders)
-        set -eu
-        topic="''${1:?topic required}"
-        headers=()
-        if [ -n "''${NTFY_TITLE:-}" ]; then headers+=(-H "Title: $NTFY_TITLE"); fi
-        if [ -n "''${NTFY_TAG:-}" ]; then headers+=(-H "Tag: $NTFY_TAG"); fi
-        if [ "''${2:-}" != "" ]; then headers+=(-H "Priority: $2"); fi
-        headers+=(-H "Authorization: Bearer $(cat ${cfg.tokenFile})")
-        exec ${pkgs.curl}/bin/curl -f --max-time 30 --retry 3 \
-          "''${headers[@]}" --data-binary @- \
-          "http://127.0.0.1:${toString cfg.port}/$topic"
-      '';
+      # ─── ntfy-send wrapper ───
+      # Usage: ntfy-send <topic> [priority]   (body on stdin)
+      # `priority` accepts ntfy priorities (min|low|default|high|urgent)
+      # and snapraidd levels (info|warning|error), which are translated.
+      # Optional env: NTFY_TITLE, NTFY_TAG (used for snapraidd placeholders).
+      # The token is read at runtime from the sops secret, so rotating it
+      # does not require restarting anything.
+      ntfySend = pkgs.writeShellApplication {
+        name = "ntfy-send";
+        runtimeInputs = [pkgs.curl];
+        text = ''
+          set -eu
+          topic="''${1:?topic required}"
+
+          # ─── snapraidd levels → ntfy priorities (safety net) ───
+          case "''${2:-}" in
+            info|INFO)     prio="low" ;;
+            warn|warning)  prio="high" ;;
+            error|ERROR)   prio="urgent" ;;
+            min|low|default|high|urgent) prio="$2" ;;
+            "")            prio="" ;;
+            *)             prio="default" ;;
+          esac
+
+          headers=()
+          if [ -n "''${NTFY_TITLE:-}" ]; then headers+=(-H "Title: $NTFY_TITLE"); fi
+          if [ -n "''${NTFY_TAG:-}" ]; then headers+=(-H "Tag: $NTFY_TAG"); fi
+          if [ -n "$prio" ]; then headers+=(-H "Priority: $prio"); fi
+
+          # Bash-only redirection: the daemon spawns this script with a
+          # minimal environment (no PATH), so `cat` is NOT available.
+          token="$(</run/secrets/ntfy-token)"
+          headers+=(-H "Authorization: Bearer $token")
+
+          exec ${pkgs.curl}/bin/curl -f --max-time 30 --retry 3 \
+            "''${headers[@]}" --data-binary @- \
+            "http://127.0.0.1:2586/$topic"
+        '';
+      };
 
       ntfySettings = {
         base-url = "http://${config.networking.hostName}:${toString cfg.port}";

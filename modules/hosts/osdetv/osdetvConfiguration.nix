@@ -58,6 +58,11 @@
 
       services.ntfy.enable = true;
 
+      sops.secrets."ntfy-token" = {
+        group = "nogroup";
+        mode = "0440";
+      };
+
       services.smb = {
         enable = true;
         workgroup = "WORKGROUP";
