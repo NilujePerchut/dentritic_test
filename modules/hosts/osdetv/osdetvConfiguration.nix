@@ -86,5 +86,13 @@
         user = "niluje";
         group = "users";
       };
+
+      services.netdataNas = {
+        enable = true;
+        notifications = {
+          topic = "nas-monitoring";
+          tokenFile = config.sops.secrets."ntfy-token".path;
+        };
+      };
     });
 }

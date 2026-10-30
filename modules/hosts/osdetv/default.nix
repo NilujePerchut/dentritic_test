@@ -28,6 +28,7 @@
         ntfy
         samba
         immich
+        netdata
       ]);
   };
 }
