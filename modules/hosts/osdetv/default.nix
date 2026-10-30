@@ -25,6 +25,7 @@
         cli-utils
         sops
         nas
+        ntfy
         samba
         immich
       ]);

@@ -45,8 +45,18 @@
           port = 7627;
           listenAll = true;
           lanCidr = "192.168.40.0/24";
+          notify = {
+            # Rodage: report every maintenance run; raise to "warning" once
+            # the setup is trusted.
+            resultLevel = "info";
+            # %s title, %t tag, %n ntfy priority (substituted by snapraidd
+            # before executing), full report on stdin.
+            resultCmd = ''NTFY_TITLE="%s" NTFY_TAG="%t" ${config.services.ntfy.sendScript}/bin/ntfy-send nas-alerts "%n"'';
+          };
         };
       };
+
+      services.ntfy.enable = true;
 
       services.smb = {
         enable = true;
