@@ -29,6 +29,7 @@
         samba
         immich
         netdata
+        nasCheck
       ]);
   };
 }

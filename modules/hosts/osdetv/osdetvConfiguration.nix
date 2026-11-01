@@ -47,9 +47,7 @@
           lanCidr = "192.168.40.0/24";
           smart.ignore = [ "* Spin_Up_Time Raw_Read_Error_Rate" ];
           notify = {
-            # Rodage: report every maintenance run; raise to "warning" once
-            # the setup is trusted.
-            resultLevel = "info";
+            resultLevel = "warning";
             # %s title, %t tag, %n ntfy priority (substituted by snapraidd
             # before executing), full report on stdin.
             resultCmd = ''NTFY_TITLE="%s" NTFY_TAG="%t" ${config.services.ntfy.sendScript}/bin/ntfy-send nas-alerts "%n"'';
@@ -94,6 +92,21 @@
           topic = "nas-monitoring";
           tokenFile = config.sops.secrets."ntfy-token".path;
         };
+
+      # No swap on this host : the stock used_swap
+      # alert fires a boot-time false positive on an empty system.swap
+      # chart. Disable it via the [health] pattern filter; remove this
+      # line when permanent swap lands.
+      settings.health."enabled alarms" = "!used_swap *";      };
+
+      services.nasCheck = {
+        enable = true;
+        notify = true;
+      };
+
+      services.nasCheck = {
+        enable = true;
+        notify = true;
       };
     });
 }

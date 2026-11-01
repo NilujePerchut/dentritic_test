@@ -123,39 +123,3 @@
       };
     });
 }
-
-# ---------------------------------------------------------------------------
-# HOST osdetv — registration:
-# wherever samba/immich/ntfy nixosModules are imported on the host, add:
-#
-#   imports = [ self.nixosModules.netdata ];   # next to self.nixosModules.samba etc.
-#
-# and enable:
-#
-#   services.netdataNas = {
-#     enable = true;
-#     notifications = {
-#       topic = "nas-monitoring";
-#       tokenFile = config.sops.secrets."ntfy-token".path;
-#     };
-#     # rodage: keep defaults first, add SMART/disk alarms after the first week
-#     # healthRules."disks.conf" = ''' … seuils relevés depuis le dashboard … ''';
-#   };
-#
-# Provisioning (once, CLI runbook — invariant n°5): nothing new to provision.
-# The existing ntfy token already has access 'nas-*' rw, which covers the
-# nas-monitoring topic. Subscribe the Android app to "nas-monitoring" (F-Droid,
-# token auth) to receive the alerts.
-#
-# Verification after `sudo nixos-rebuild switch --flake .#osdetv`:
-#   systemctl status netdata
-#   journalctl -u netdata -e
-#   curl -s localhost:19999/api/v1/info | head
-#   sudo -u netdata smartctl -H /dev/sdX        # ndsudo path sanity check
-#   # end-to-end alert test (validates send_custom arg order on your netdata):
-#   sudo -u netdata ${pkgs.netdata}/libexec/netdata/plugins.d/alarm-notify.sh test sysadmin
-#
-# Points to verify on the first build (nixpkgs 26.05):
-#   - the "withNdsudo" override argument name of the netdata package
-#   - the "retention" key of the [db] section on your netdata version
-# ---------------------------------------------------------------------------
