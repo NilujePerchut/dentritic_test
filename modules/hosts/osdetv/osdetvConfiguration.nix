@@ -45,6 +45,7 @@
           port = 7627;
           listenAll = true;
           lanCidr = "192.168.40.0/24";
+          smart.ignore = [ "* Spin_Up_Time Raw_Read_Error_Rate" ];
           notify = {
             # Rodage: report every maintenance run; raise to "warning" once
             # the setup is trusted.
