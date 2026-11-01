@@ -56,6 +56,11 @@
       };
 
       services.ntfy.enable = true;
+      services.ntfy.failureNotify = {
+        enable = true;
+        units = [ "snapraidd" "samba-smbd" "postgresql" "immich-server"
+                  "immich-machine-learning" "redis-immich" ];
+      };
 
       sops.secrets."ntfy-token" = {
         group = "nogroup";
@@ -98,11 +103,6 @@
       # chart. Disable it via the [health] pattern filter; remove this
       # line when permanent swap lands.
       settings.health."enabled alarms" = "!used_swap *";      };
-
-      services.nasCheck = {
-        enable = true;
-        notify = true;
-      };
 
       services.nasCheck = {
         enable = true;

@@ -59,6 +59,19 @@
         auth-default-access = "deny-all";
       };
 
+      # OnFailure sender: takes the failed unit name as $1, priority as $2.
+      # Testable standalone: ntfy-failure-notify snapraidd.service urgent </dev/null
+      failureNotify = pkgs.writeShellScriptBin "ntfy-failure-notify" ''
+        set -eu
+        unit="''${1:?failed unit name required}"
+        prio="''${2:-urgent}"
+        host="${config.networking.hostName}"
+        ${ntfySend}/bin/ntfy-send ${cfg.failureNotify.topic} "$prio" <<EOF
+        Service $unit failed on $host.
+        Investigate: journalctl -u "$unit" -e
+        EOF
+      '';
+
     in {
       options.services.ntfy = {
         enable = lib.mkEnableOption "Self-hosted ntfy push notification server";
@@ -98,11 +111,34 @@
           readOnly = true;
           description = "ntfy-send wrapper: topic as arg, optional priority, body on stdin";
         };
+
+        # ─── Filet OnFailure systemd → ntfy ───
+        failureNotify = {
+          enable = lib.mkEnableOption "systemd OnFailure safety net → ntfy";
+
+          topic = lib.mkOption {
+            type = lib.types.str;
+            default = "nas-monitoring";
+            description = "ntfy topic for unit-failure alerts";
+          };
+
+          units = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [];
+            example = ["snapraidd" "samba-smbd" "immich-server"];
+            description = ''
+              Unit names to watch: each gets OnFailure= pointing at the
+              ntfy-failure@ template. Use real unit names (systemctl
+              list-units). Deliberately never include ntfy itself: if the
+              notification server is down, the alert could not be sent
+              anyway (chicken-and-egg; host-down blind spot is tracked
+              separately).
+            '';
+          };
+        };
       };
 
       config = lib.mkIf cfg.enable {
-        # One secret per file, YAML key "token" (sops-nix default key =
-        # secret name, hence the explicit override like the samba facade).
         sops.secrets."ntfy-token" = {
           sopsFile = "${self}/secrets/ntfy-token.sops.yaml";
           key = "token";
@@ -119,19 +155,6 @@
           settings = ntfySettings;
         };
 
-        # The upstream module relies on DynamicUser + StateDirectory, which
-        # is incompatible with the one-time CLI provisioning of auth.db
-        # (invariant #5: a per-boot ephemeral UID cannot own stable state).
-        # Run as the static user instead.
-        systemd.services.ntfy-sh.serviceConfig = {
-          # mkForce: override the upstream DynamicUser=true (equal priority
-          # would be a conflict).
-          DynamicUser = lib.mkForce false;
-          ReadWritePaths = ["${cfg.stateDir}"];
-        };
-
-        # The upstream module does not provision the service user:
-        # create a dedicated system user for it.
         users.groups.${cfg.group} = {};
 
         users.users.${cfg.user} = {
@@ -143,16 +166,64 @@
         environment.systemPackages = [
           pkgs.ntfy-sh # CLI for one-time provisioning and tests
           ntfySend
+          failureNotify
         ];
 
         systemd.tmpfiles.rules = [
           "d ${cfg.stateDir} 0700 ${cfg.user} ${cfg.group} -"
         ];
 
-        # If the state dir happens to live inside a mount (other hosts),
-        # systemd derives the dependency from the path itself. This is a
-        # native systemd directive, hence unitConfig and not a NixOS option.
-        systemd.services.ntfy-sh.unitConfig.RequiresMountsFor = ["${cfg.stateDir}"];
+        # All systemd.services definitions in ONE mkMerge: a single STATIC
+        # key whose value is lazy. Two traps avoided at once:
+        #  - never mix `systemd.services.X = …` (nested path) and
+        #    `systemd.services = …` (direct assign) in the same attrset
+        #    (plain-Nix duplicate attribute);
+        #  - never put a genAttrs over an option as mkIf/mkMerge CONTENT:
+        #    its keys get forced during module normalization → infinite
+        #    recursion. As a VALUE inside this mkMerge, it is evaluated
+        #    lazily at option-merge time, when reading the option is safe.
+        systemd.services = lib.mkMerge [
+          {
+            # The upstream module relies on DynamicUser + StateDirectory,
+            # incompatible with the one-time CLI provisioning of auth.db
+            # (invariant #5). Run as the static user instead.
+            ntfy-sh.serviceConfig = {
+              DynamicUser = lib.mkForce false;
+              ReadWritePaths = ["${cfg.stateDir}"];
+            };
+          }
+          {
+            # Native systemd directive (unitConfig): if the state dir lives
+            # inside a mount, systemd derives the dependency from the path.
+            ntfy-sh.unitConfig.RequiresMountsFor = ["${cfg.stateDir}"];
+          }
+          {
+            # ─── OnFailure net: template unit ───
+            # The failed unit's name arrives via the INSTANCE (%i), expanded
+            # by systemd in directives only — hence the ExecStart argument,
+            # never %i in a script body (the 31/10 bug: literal "%i").
+            "ntfy-failure@" = lib.mkIf cfg.failureNotify.enable {
+              description = "Alert ntfy: unit %i failed";
+              # If the failure happens at boot, the alert waits for ntfy.
+              after = ["network-online.target" "ntfy-sh.service"];
+              wants = ["network-online.target"];
+              # No OnFailure here: no recursion. If the send fails (ntfy
+              # down), the oneshot just fails silently.
+              serviceConfig = {
+                Type = "oneshot";
+                ExecStart = "${failureNotify}/bin/ntfy-failure-notify %i urgent";
+              };
+            };
+          }
+          # ─── OnFailure net: hooks on watched units ───
+          # genAttrs as a mkMerge VALUE: lazy, evaluated at option-merge
+          # time when reading cfg.failureNotify.units is safe.
+          (lib.mkIf cfg.failureNotify.enable (
+            lib.genAttrs cfg.failureNotify.units (_: {
+              unitConfig.OnFailure = "ntfy-failure@%n.service";
+            })
+          ))
+        ];
       };
     });
 }
