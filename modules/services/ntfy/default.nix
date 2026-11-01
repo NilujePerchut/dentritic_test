@@ -52,8 +52,10 @@
         base-url = "http://${config.networking.hostName}:${toString cfg.port}";
         listen-http = ":${toString cfg.port}";
         cache-file = "${cfg.stateDir}/cache.db";
+        cache-duration = "168h";
         auth-file = "${cfg.stateDir}/auth.db";
         attachment-cache-dir = "${cfg.stateDir}/attachments";
+        attachment-expiry-duration = "168h";
         auth-default-access = "deny-all";
       };
 
