@@ -139,7 +139,7 @@
           maintenance = {
             schedule = lib.mkOption {
               type = lib.types.str;
-              default = "02:00";
+              default = "03:30";
               description = "Check window sync+scrub+rapport (HH:MM ou 'Mon 03:00, Thu 04:00')";
             };
             scrubPercentage = lib.mkOption {
@@ -268,6 +268,8 @@
             "notify_result = ${cfg.snapraidd.notify.resultCmd}"}
           ${lib.optionalString (cfg.snapraidd.notify.startCmd != null)
             "notify_start = ${cfg.snapraidd.notify.startCmd}"}
+          notify_syslog_enabled = 1
+          notify_syslog_level = error
         '';
 
         systemd.services.snapraidd = lib.mkIf cfg.snapraidd.enable {
