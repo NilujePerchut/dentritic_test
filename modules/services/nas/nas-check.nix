@@ -22,7 +22,7 @@
           # non-ASCII message strings (accents, emoji) in the build
           # environment (no locale). We keep the same dependency
           # isolation with an explicit PATH.
-          export PATH="${lib.makeBinPath [pkgs.curl pkgs.jq pkgs.systemd]}:$PATH"
+          export PATH="${lib.makeBinPath [pkgs.curl pkgs.jq pkgs.systemd pkgs.gawk pkgs.inetutils]}:$PATH"
 
           # ─── Runtime configuration injected by the facade ───
           export NASCHECK_NETDATA_URL="${cfg.netdataUrl}"
@@ -35,7 +35,7 @@
           # NASCHECK_NOTIFY (option `notify`), which the -n flag can raise
           # per-invocation even on a host with notify=false.
           export NASCHECK_SEND="${send}/bin/ntfy-send"
-          export NASCHECK_NOTIFY="${lib.boolToString cfg.notify}"
+          export NASCHECK_NOTIFY="${if cfg.notify then "1" else "0"}"
           # Reusability: the digest adapts to what this host runs.
           export NASCHECK_CHECKS="${lib.concatStringsSep " " cfg.checks}"
           export NASCHECK_JOURNAL_HOURS="${toString cfg.journalHours}"
