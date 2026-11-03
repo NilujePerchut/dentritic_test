@@ -98,11 +98,16 @@
           tokenFile = config.sops.secrets."ntfy-token".path;
         };
 
-      # No swap on this host : the stock used_swap
-      # alert fires a boot-time false positive on an empty system.swap
-      # chart. Disable it via the [health] pattern filter; remove this
-      # line when permanent swap lands.
-      settings.health."enabled alarms" = "!used_swap *";      };
+        # No swap on this host : the stock used_swap
+        # alert fires a boot-time false positive on an empty system.swap
+        # chart. Disable it via the [health] pattern filter; remove this
+        # line when permanent swap lands.
+
+        # !net_drops — INTERIM, décision 03/11/2026 :
+        # RX drops constants 0,5/s = broadcasts Realtek 0x8899 (MAC 54:07:7d:20:b3:3b,
+        # likely player Freebox), 22% du trafic RX.
+        settings.health."enabled alarms" = "!used_swap !net_drops *";
+      };
 
       services.nasCheck = {
         enable = true;

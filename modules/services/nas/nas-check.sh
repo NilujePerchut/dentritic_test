@@ -120,7 +120,12 @@ check_services() {
 # ─── check: snapraidd errors over the journal window ───
 check_snapraid() {
   local snap_errors
+  # 'failed to save config' = the daemon cannot persist its state into the
+  # NixOS-generated config (immutable store symlink). Benign: the maintenance
+  # schedule is recomputed from config at each start. Excluded to avoid a
+  # daily false positive; every new benign line must earn its place here.
   snap_errors=$(journalctl -u "$SNAPRAID_UNIT" --since "$HOURS hours ago" 2>/dev/null \
+    | grep -viE 'failed to save config' \
     | grep -ciE 'error|fail|exception' || true)
   if [ "${snap_errors:-0}" -gt 0 ]; then
     problems+=("$snap_errors snapraidd errors (${HOURS}h)")

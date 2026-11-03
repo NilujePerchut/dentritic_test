@@ -115,7 +115,14 @@
           description = "NAS daily digest";
           after = ["network-online.target"];
           wants = ["network-online.target"];
-          serviceConfig.Type = "oneshot";
+          serviceConfig = {
+            Type = "oneshot";
+            # exit 1 = "problems found" is the script's documented contract,
+            # not a service crash: without this, every digest with problems leaves
+            # the unit in 'failed' state → the 'services' check counts it the next
+            # day (self-referential false positive).
+            SuccessExitStatus = [ 1 ];
+          };
           script = "${nasCheck}/bin/nas-check all";
         };
 
