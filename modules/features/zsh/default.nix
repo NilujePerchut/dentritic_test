@@ -4,15 +4,16 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.zsh = moduleWithSystem ({pkgs, ...}:
-  {
+  flake.nixosModules.zsh = moduleWithSystem ({pkgs, ...}: {config, ...}: let
+    user = config.myConfig.user.name;
+  in {
     environment.systemPackages = with pkgs; [
       # Base programs
       zsh
       starship
     ];
 
-    home-manager.users.niluje = {
+    home-manager.users.${user} = {
       # ZSH
       programs.zsh = {
         enable = true;

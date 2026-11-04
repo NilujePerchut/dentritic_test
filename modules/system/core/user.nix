@@ -4,15 +4,15 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.user-niluje = moduleWithSystem ({inputs', ...}: let
-    user = "niluje";
+  flake.nixosModules.user = moduleWithSystem ({...}: {config, ...}: let
+    user = config.myConfig.user.name;
   in {
     # Add the plugdev group
     users.groups.plugdev = {};
 
     users.users.${user} = {
       isNormalUser = true;
-      description = "niluje";
+      description = config.myConfig.user.description;
       extraGroups = [
         "wheel"
         "plugdev"

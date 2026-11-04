@@ -4,14 +4,15 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.kitty = moduleWithSystem ({pkgs, ...}:
-  {
+  flake.nixosModules.kitty = moduleWithSystem ({pkgs, ...}: {config, ...} : let
+    user = config.myConfig.user.name;
+  in {
     environment.systemPackages = with pkgs; [
       # Base programs
       kitty
     ];
 
-    home-manager.users.niluje = {
+    home-manager.users.${user} = {
       xdg.configFile."kitty/kitty.conf".source = "${inputs.niluje-configs}/kitty.conf";
     };
   });

@@ -4,8 +4,9 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.nvim = moduleWithSystem ({pkgs, ...}:
-  {
+  flake.nixosModules.nvim = moduleWithSystem ({pkgs, ...}: {config, ...}: let
+    user = config.myConfig.user.name;
+  in {
     environment.systemPackages = with pkgs; [
       # Base programs
       neovim
@@ -19,7 +20,7 @@
       fd
     ];
 
-    home-manager.users.niluje = {
+    home-manager.users.${user} = {
       xdg.configFile."nvim" = {
         source = "${inputs.niluje-configs}/nvim";
         recursive = true;

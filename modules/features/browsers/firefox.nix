@@ -4,14 +4,15 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.firefox = moduleWithSystem({pkgs, ...}:
+  flake.nixosModules.firefox = moduleWithSystem({pkgs, ...}: {config, ...}: let
+    user = config.myConfig.user.name;
   {
     environment.systemPackages = with pkgs; [ firefox ];
 
-    home-manager.users.niluje = {
+    home-manager.users.${user} = {
       programs.firefox = {
         enable = true;
-        profiles.niluje = {
+        profiles.${user} = {
           extensions.packages = with inputs.firefox-addons.packages."x86_64-linux"; [
             ublock-origin
             sponsorblock
