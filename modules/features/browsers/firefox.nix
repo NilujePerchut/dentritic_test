@@ -6,7 +6,7 @@
 }: {
   flake.nixosModules.firefox = moduleWithSystem({pkgs, ...}: {config, ...}: let
     user = config.myConfig.user.name;
-  {
+  in {
     environment.systemPackages = with pkgs; [ firefox ];
 
     home-manager.users.${user} = {

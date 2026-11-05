@@ -29,16 +29,17 @@
         enable = true;
         cpuVendor = "intel";
       };
-    }] ++ {[
       myConfig.user = {
         name = "cdebarge";
-	description = "Cédric Debarge";
-	gitName = "Cédric Debarge";
-	gitEmail = "cedric.debarge@ion-x.eu";
+	      description = "Cédric Debarge";
+	      gitName = "Cédric Debarge";
+	      gitEmail = "cedric.debarge@ion-x.eu";
       };
 
-      # Only applied ar first user creation; use mkpasswd -m yescrypt to generate
-      users.users.cdebarge.initialHashPassword = "$y$j9T$REPLACE_ME";
-    ]};
+      # Only applied at first user creation; use mkpasswd -m yescrypt to generate
+      users.users.cdebarge.initialHashedPassword = "$y$j9T$REPLACE_ME";
+
+      services.unbound.enable = inputs.nixpkgs.lib.mkForce false;
+    }];
   };
 }
