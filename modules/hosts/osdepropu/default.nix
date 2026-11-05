@@ -14,8 +14,8 @@
         home-manager.extraSpecialArgs = {inherit inputs;};
       }
     ] ++ (with self.nixosModules; [
-      osdevmConfiguration
-      osdevmDiskConfiguration
+      osdepropuConfiguration
+      osdepropuDiskConfiguration
       core
       bootloader-legacy
       power

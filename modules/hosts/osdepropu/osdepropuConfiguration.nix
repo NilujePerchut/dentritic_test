@@ -1,7 +1,7 @@
 {...}: {
-  flake.nixosModules.osdevmConfiguration = {pkgs, lib, ...}: {
+  flake.nixosModules.osdepropuConfiguration = {pkgs, lib, ...}: {
     networking = {
-      hostName = "osdevm";
+      hostName = "osdepropu";
     };
     environment.systemPackages = with pkgs; [ ];
     swapDevices = [ ];

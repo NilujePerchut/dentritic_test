@@ -3,7 +3,7 @@
   moduleWithSystem,
   ...
 }: {
-  flake.nixosModules.osdevmDiskConfiguration = moduleWithSystem ({
+  flake.nixosModules.osdepropuDiskConfiguration = moduleWithSystem ({
     pkgs,
     self,
     inputs,
