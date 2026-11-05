@@ -3,7 +3,7 @@
   inputs,
   ...
 }: {
-  flake.nixosModules.bootloader = {
+  flake.nixosModules.bootloader-uefi = {
     pkgs,
     lib,
     ...

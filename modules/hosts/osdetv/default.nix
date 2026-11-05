@@ -20,6 +20,7 @@
         osdetvConfiguration
         osdetvDiskConfiguration
         core
+	bootloader-uefi
         nix-ld
         network
         cli-utils

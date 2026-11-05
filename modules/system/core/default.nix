@@ -11,7 +11,6 @@
     modules = with self.nixosModules; [
       params
       user
-      bootloader
       nix
       locale
       hosts

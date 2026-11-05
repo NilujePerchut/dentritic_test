@@ -17,6 +17,7 @@
     ] ++ (with self.nixosModules; [
       osdeplacardConfiguration
       osdeplacardDiskConfiguration
+      bootloader-uefi
       core
       power
       nix-ld

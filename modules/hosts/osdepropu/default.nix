@@ -17,6 +17,7 @@
       osdevmConfiguration
       osdevmDiskConfiguration
       core
+      bootloader-legacy
       power
       bluetooth
       nix-ld
