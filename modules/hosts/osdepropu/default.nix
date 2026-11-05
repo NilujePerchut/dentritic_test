@@ -18,6 +18,7 @@
       osdepropuDiskConfiguration
       core
       bootloader-legacy
+      desktopX11
       power
       bluetooth
       nix-ld
