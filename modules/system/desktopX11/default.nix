@@ -6,6 +6,7 @@
   flake.nixosModules.desktopX11 = moduleWithSystem ({pkgs, lib, config, ...}: let
     modules = with self.nixosModules; [
       desktopX11-xfce
+      desktopX11-i3
       term_emu
       browsers
     ];
@@ -22,8 +23,6 @@
       displayManager.lightdm = {
         enable = true;
       };
-
-      desktopManager.xfce.enable = true;
     };
 
     services.displayManager.defaultSession = "xfce";
