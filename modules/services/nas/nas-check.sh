@@ -21,6 +21,7 @@ SEND="${NASCHECK_SEND:-}"        # path to the ntfy-send wrapper (always exporte
 NOTIFY="${NASCHECK_NOTIFY:-0}"   # send policy (facade `notify` option)
 CHECKS="${NASCHECK_CHECKS:-netdata pool services snapraid}"  # groups run by `all`
 HOURS="${NASCHECK_JOURNAL_HOURS:-24}"  # journal inspection window
+BACKUPS="${NASCHECK_BACKUPS:-/mnt/mergerfs/server/backups}"
 host=$(hostname -s)
 
 usage() {
@@ -35,6 +36,7 @@ group    all (default) | netdata | pool | services | snapraid
          services      systemd units in failed state
          snapraid      snapraidd errors in the journal
                        (window: journalHours, default 24h)
+		 backups       state backup grid present and fresh (per job)
 
 -n       send the ntfy notification for this invocation
          (default: this host's services.nasCheck.notify option)
@@ -51,7 +53,7 @@ group="all"
 while [ $# -gt 0 ]; do
   case "$1" in
     -n|--notify) NOTIFY=1 ;;
-    all|netdata|pool|services|snapraid) group="$1" ;;
+    all|netdata|pool|services|snapraid|backups) group="$1" ;;
     help|-h|--help) usage; exit 0 ;;
     list) echo "available groups: all $CHECKS"; exit 0 ;;
     *) usage; exit 2 ;;
@@ -134,9 +136,32 @@ check_snapraid() {
   fi
 }
 
+# ─── check: state backups fresh (the silent-killer check) ───
+# A backup job that quietly stops producing is worse than no backup:
+# the grid LOOKS healthy. Digest turns absence into a signal.
+check_backups() {
+  local job newest age_h
+  if [ ! -d "$BACKUPS" ]; then
+    problems+=("backup root $BACKUPS not found")
+    return
+  fi
+  for job in "$BACKUPS"/*; do
+    [ -d "$job" ] || continue
+    newest=$(ls -1 "$job/daily"/*.dump 2>/dev/null | sort | tail -1)
+    if [ -z "$newest" ]; then
+      problems+=("backup: no dump for $(basename "$job")")
+    else
+      age_h=$(( ($(date +%s) - $(stat -c %Y "$newest")) / 3600 ))
+      # 26h = one full cycle + 2h tolerance (Persistent timer may run late)
+      [ "$age_h" -gt 26 ] && problems+=("backup: $(basename "$job") last dump ${age_h}h old")
+    fi
+  done
+  echo "backups: OK — grid present and fresh"
+ }
+
 # ─── Run ───
 case "$group" in
-  netdata|pool|services|snapraid)
+  netdata|pool|services|snapraid|backups)
     # Capture the check output for the -n notification. The check runs in
     # the current shell (no subshell) so the `problems` array keeps its
     # findings; output goes to a temp file, then is displayed locally.

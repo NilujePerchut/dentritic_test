@@ -39,6 +39,7 @@
           # Reusability: the digest adapts to what this host runs.
           export NASCHECK_CHECKS="${lib.concatStringsSep " " cfg.checks}"
           export NASCHECK_JOURNAL_HOURS="${toString cfg.journalHours}"
+          export NASCHECK_BACKUPS="${config.services.stateBackup.backupsDir}"
           ${script}
       '';
 
@@ -85,8 +86,8 @@
         };
 
         checks = lib.mkOption {
-          type = lib.types.listOf (lib.types.enum ["netdata" "pool" "services" "snapraid"]);
-          default = ["netdata" "pool" "services" "snapraid"];
+          type = lib.types.listOf (lib.types.enum ["netdata" "pool" "services" "snapraid" "backups"]);
+          default = ["netdata" "pool" "services" "snapraid" "backups"];
           description = ''
             Groups run by the daily digest (nas-check all). Remove the
             groups irrelevant to this host — e.g. a host without snapraid

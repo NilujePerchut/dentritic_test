@@ -59,7 +59,7 @@
       services.ntfy.failureNotify = {
         enable = true;
         units = [ "snapraidd" "samba-smbd" "postgresql" "immich-server"
-                  "immich-machine-learning" "redis-immich" ];
+                  "immich-machine-learning" "redis-immich" "statebackup" ];
       };
 
       sops.secrets."ntfy-token" = {
@@ -89,6 +89,7 @@
         dataDir = "/mnt/mergerfs/server/immich";
         user = "niluje";
         group = "users";
+        stateBackup.enable = true;
       };
 
       services.netdataNas = {
@@ -113,5 +114,8 @@
         enable = true;
         notify = true;
       };
+
+      services.stateBackup.enable = true;
+      services.ntfy.stateBackup.enable = true;
     });
 }

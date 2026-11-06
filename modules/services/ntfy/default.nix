@@ -136,6 +136,8 @@
             '';
           };
         };
+
+        stateBackup.enable = lib.mkEnableOption "ntfy auth state dump via services.stateBackup";
       };
 
       config = lib.mkIf cfg.enable {
@@ -172,6 +174,21 @@
         systemd.tmpfiles.rules = [
           "d ${cfg.stateDir} 0700 ${cfg.user} ${cfg.group} -"
         ];
+
+        # ── State backup job: auth.db only (cache.db/attachments are
+        # disposable, invariant #4). SQLite online-backup API = consistent
+        # copy without stopping ntfy; restore is a plain file copy
+        # (units stopped by the engine) with pool-owner invariant restored.
+        services.stateBackup.jobs.ntfy = lib.mkIf cfg.stateBackup.enable {
+          stopUnits = ["ntfy-sh.service"];
+          dumpCommand = ''
+            ${pkgs.sqlite}/bin/sqlite3 "${cfg.stateDir}/auth.db" ".backup '$1'"
+          '';
+          restoreCommand = ''
+            cp "$1" "${cfg.stateDir}/auth.db"
+            chown ${cfg.user}:${cfg.group} "${cfg.stateDir}/auth.db"
+          '';
+        };
 
         # All systemd.services definitions in ONE mkMerge: a single STATIC
         # key whose value is lazy. Two traps avoided at once:

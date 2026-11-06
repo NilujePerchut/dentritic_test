@@ -54,6 +54,16 @@
           default = {};
           description = "Pass-through to services.immich.settings — see https://immich.app/docs/install/config-file/";
         };
+
+        stateBackup = {
+          enable = lib.mkEnableOption "immich database dumps via services.stateBackup";
+
+          dbName = lib.mkOption {
+            type = lib.types.str;
+            default = "immich";
+            description = "PostgreSQL database to dump (role/ownership provisioned once, see runbook)";
+          };
+        };
       };
 
       config = lib.mkIf cfg.enable {
@@ -93,6 +103,27 @@
         security.acme = lib.mkIf (cfg.domain != null) {
           acceptTerms = true;
           defaults.email = "you@example.com"; # adjust per host or per domain
+        };
+
+        # ── State backup job: registered into services.stateBackup ──
+        # Runbook (restore): nas-backup restore immich --file <dump>
+        services.stateBackup.jobs.immich = lib.mkIf cfg.stateBackup.enable {
+          stopUnits = ["immich-server.service" "immich-machine-learning.service"];
+          dumpCommand = ''
+            # pg_dump writes to STDOUT: the tmp file is opened by the engine
+            # shell as ROOT (postgres never needs write access to the pool).
+            # Consistent MVCC snapshot while immich keeps running.
+            ${pkgs.sudo}/bin/sudo -u postgres ${lib.getExe' pkgs.postgresql "pg_dump"} \
+              -Fc -d ${cfg.stateBackup.dbName} > "$1"
+          '';
+          restoreCommand = ''
+            # --clean --if-exists drops and recreates each object IN the
+            # existing database (ownership survives); superuser needed to
+            # replay CREATE EXTENSION (vchord CASCADE etc.). immich-server
+            # replays its schema migrations FORWARD on boot afterwards.
+            ${pkgs.sudo}/bin/sudo -u postgres ${lib.getExe' pkgs.postgresql "pg_restore"} \
+              --clean --if-exists -j 2 -d ${cfg.stateBackup.dbName} "$1"
+          '';
         };
       };
     });

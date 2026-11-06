@@ -31,6 +31,7 @@
         immich
         netdata
         nasCheck
+        statebackup
       ]);
   };
 }
