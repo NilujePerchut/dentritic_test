@@ -1,0 +1,112 @@
+{
+  flake.nixosModules.homepage =
+    { config, lib, ... }:
+    {
+      config = {
+        services.homepage-dashboard = {
+          enable = true;
+
+          allowedHosts = "localhost:8082,127.0.0.1:8082,192.168.40.43:8082";
+
+          bookmarks = [
+            {
+              Developer = [
+                {
+                  Github = [
+                    {
+                      abbr = "GH";
+                      icon = "github.png";
+                      href = "https://github.com/NilujePerchut/";
+                    }
+                  ];
+                }
+                {
+                  "Nixos package search" = [
+                    {
+                      abbr = "NPS";
+                      href = "https://search.nixos.org/packages";
+                    }
+                  ];
+                }
+                {
+                  MyNixos = [
+                    {
+                      abbr = "MN";
+                      href = "https://mynixos.com/";
+                    }
+                  ];
+                }
+              ];
+            }
+          ];
+
+          services = [
+            {
+              Media = [
+                {
+                  Immich = {
+                    description = "Photo library";
+                    icon = "immich.png";
+                    href = "http://192.168.40.66:2283";
+                  };
+                }
+              ];
+            }
+            {
+              Monitoring = [
+                {
+                  Netdata = {
+                    description = "NAS metrics and alerts";
+                    icon = "netdata.png";
+                    href = "http://192.168.40.66:19999";
+                  };
+                }
+                {
+                  ntfy = {
+                    description = "Push notifications";
+                    icon = "ntfy.png";
+                    href = "http://192.168.40.66:2586";
+                  };
+                }
+              ];
+            }
+            {
+              Home = [
+                {
+                  Freebox = {
+                    description = "Freebox admin page";
+                    icon = "freebox-revolution.png";
+                    href = "https://192.168.40.254";
+                  };
+                }
+              ];
+            }
+          ];
+
+          widgets = [
+            {
+              resources = {
+                cpu = true;
+                disk = "/";
+                memory = true;
+              };
+            }
+            {
+              datetime = {
+                locale = "fr";
+                text_size = "xl";
+              };
+            }
+            {
+              search = {
+                provider = "google";
+                target = "_blank";
+                focus = true;
+                showSearchSuggestions = true;
+              };
+            }
+          ];
+        };
+      };
+    };
+}

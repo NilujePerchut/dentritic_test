@@ -24,6 +24,7 @@
       network
       cli-utils
       sops
+      homepage
     ]) ++ [{
       myConfig.power = {
         enable = true;
