@@ -25,6 +25,7 @@
       cli-utils
       sops
       homepage
+      solidcraft
     ]) ++ [{
       myConfig.power = {
         enable = true;

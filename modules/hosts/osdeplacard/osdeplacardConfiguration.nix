@@ -12,5 +12,7 @@
     ];
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     system.stateVersion = lib.mkForce "24.05";
+
+    services.solidcraftWeb.enable = true;
   };
 }

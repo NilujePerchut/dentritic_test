@@ -85,6 +85,17 @@
               ];
             }
             {
+              Tools = [
+                {
+                  SolidCraft = {
+                    href = "http://192.168.40.43:8095";
+                    icon = "mdi-cube-outline";
+                    description = "Parametric 3D CAD (browser)";
+                  };
+                }
+              ];
+            }
+            {
               Home = [
                 {
                   Freebox = {
