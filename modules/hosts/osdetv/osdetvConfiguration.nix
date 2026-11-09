@@ -115,6 +115,11 @@
         notify = true;
       };
 
+      services.navidromeNas = {
+        enable = true;
+        musicFolder = "/mnt/mergerfs/partage/music";
+      };
+
       services.stateBackup.enable = true;
       services.ntfy.stateBackup.enable = true;
     });

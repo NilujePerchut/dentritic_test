@@ -32,6 +32,7 @@
         netdata
         nasCheck
         statebackup
+        navidrome
       ]);
   };
 }
