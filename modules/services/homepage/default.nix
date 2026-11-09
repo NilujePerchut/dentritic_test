@@ -75,6 +75,13 @@
                     href = "http://192.168.40.66:2586";
                   };
                 }
+                {
+                  SnapRAID = {
+                    description = "Parity sync and scrub (Commander UI)";
+                    icon = "ugreen-nas.png";
+                    href = "http://192.168.40.66:7627";
+                  };
+                }
               ];
             }
             {
