@@ -50,17 +50,6 @@
                     href = "http://192.168.40.66:2283";
                   };
                 }
-              ];
-            }
-            {
-              Media = [
-                {
-                  Immich = {
-                    description = "Photo library";
-                    icon = "immich.png";
-                    href = "http://192.168.40.66:2283";
-                  };
-                }
                 {
                   Navidrome = {
                     description = "Music streaming";
