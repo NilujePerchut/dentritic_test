@@ -8,10 +8,21 @@
     user = config.myConfig.user.name;
 
     consoleLauncher = pkgs.writeShellScriptBin "console_launcher" ''
-      TERMINALS="kitty qterminal gnome-terminal xfce4-terminal"
-      for term in $TERMINALS; do
-        command -v $term > /dev/null 2>&1 && { exec "$term" "$@"; }
-      done
+    #!/usr/bin/env bash
+
+    # Launch the first existing terminal from the list below
+    # If the TERMINAL environment variable is set and the binary exists, use it
+    # instead (e.g. TERMINAL=st for low-perf VMs)
+
+    TERMINALS="wezterm kitty qterminal gnome-terminal xfce4-terminal"
+
+    if [ -n "$TERMINAL" ] && command -v "$TERMINAL" > /dev/null 2>&1; then
+        exec "$TERMINAL" "$@"
+    fi
+
+    for term in $TERMINALS; do
+        command -v "$term" > /dev/null 2>&1 && { exec "$term" "$@"; }
+    done
     '';
 
   in {

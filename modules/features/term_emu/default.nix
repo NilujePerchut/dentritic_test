@@ -9,6 +9,7 @@
     imports = with self.nixosModules; [
       kitty
       wezterm
+      stTerm
     ];
 
     environment.systemPackages = with pkgs; [
