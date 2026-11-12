@@ -29,6 +29,7 @@
       boot.kernelParams = [
         "nox2apic"              # avoid the x2APIC path where the IPI gets lost
         "rcupdate.rcu_normal=1" # never use expedited grace periods
+        "clocksource=acpi_pm"   # NEM mis-calibrates TSC
       ];
 
       myConfig.power = {
