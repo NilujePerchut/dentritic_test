@@ -102,6 +102,10 @@
               "${modifier}+Shift+ccedilla" = "move container to workspace number 9";
               "${modifier}+Shift+agrave" = "move container to workspace number 0";
 
+              # Move from workspace with arrows
+              "${modifier}+Left" = "workspace prev ";
+              "${modifier}+Right" = "workspace next ";
+
               # Nemo
               "${modifier}+n" = "exec nemo --no-desktop";
 
