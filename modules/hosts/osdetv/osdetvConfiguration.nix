@@ -120,7 +120,11 @@
         musicFolder = "/mnt/mergerfs/partage/music";
       };
 
-      services.stateBackup.enable = true;
+      services.stateBackup = {
+        enable = true;
+        systemdDeps = ["postgresql.service"];
+      };
+
       services.ntfy.stateBackup.enable = true;
     });
 }

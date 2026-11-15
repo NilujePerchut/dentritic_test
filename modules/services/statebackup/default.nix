@@ -42,6 +42,7 @@
         export STATEBACKUP_JOBS_FILE="${jobsFile}"
         export STATEBACKUP_ALL_JOBS="${lib.concatStringsSep " " (lib.attrNames cfg.jobs)}"
         export STATEBACKUP_GIT_REV="${gitRev}"
+        export STATEBACKUP_HOSTNAME="${config.networking.hostName}"
         ${script}
       '';
     in {
@@ -85,6 +86,15 @@
           default = {};
           description = "Backup jobs, one subdirectory per job. Services facades contribute via mkMerge.";
         };
+        systemdDeps = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          description = ''
+            Units ordered before the backup run (after + wants), e.g.
+            "postgresql.service". The timer is Persistent: a missed nightly
+            run replays at boot, racing services that start in parallel
+          '';
+        };
       };
 
       config = lib.mkIf cfg.enable {
@@ -96,6 +106,9 @@
           # A backup written to a demounted pool would be a false success:
           # systemd refuses to run the service at all instead.
           unitConfig.RequiresMountsFor = ["${cfg.backupsDir}"];
+          # Boot race fix: never dump before the DB is up.
+          after = cfg.systemdDeps;
+          wants = cfg.systemdDeps;
           serviceConfig.Type = "oneshot";
           # Dumps ALL jobs: one unit to monitor, one OnFailure hook.
           script = "${nasBackup}/bin/nas-backup dump";

@@ -43,6 +43,7 @@
           headers+=(-H "Authorization: Bearer $token")
 
           exec ${pkgs.curl}/bin/curl -f --max-time 30 --retry 3 \
+            --retry 10 --retry-all-errors --retry-delay 3 \
             "''${headers[@]}" --data-binary @- \
             "http://127.0.0.1:2586/$topic"
         '';
@@ -223,7 +224,9 @@
               description = "Alert ntfy: unit %i failed";
               # If the failure happens at boot, the alert waits for ntfy.
               after = ["network-online.target" "ntfy-sh.service"];
-              wants = ["network-online.target"];
+              # Pull ntfy-sh into the OnFailure transaction: `after` alone
+              # cannot order against a job that is not queued there.
+              wants = ["network-online.target" "ntfy-sh.service"];
               # No OnFailure here: no recursion. If the send fails (ntfy
               # down), the oneshot just fails silently.
               serviceConfig = {
@@ -237,7 +240,10 @@
           # time when reading cfg.failureNotify.units is safe.
           (lib.mkIf cfg.failureNotify.enable (
             lib.genAttrs cfg.failureNotify.units (_: {
-              unitConfig.OnFailure = "ntfy-failure@%n.service";
+              # %N = unit name WITHOUT the type suffix. With %n
+              # ("statebackup.service") the template re-appended ".service"
+              # → instance "ntfy-failure@statebackup.service.service".
+              unitConfig.OnFailure = "ntfy-failure@%N.service";
             })
           ))
         ];

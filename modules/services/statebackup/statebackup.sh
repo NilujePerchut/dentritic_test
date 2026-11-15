@@ -121,7 +121,8 @@ dump_job() { # $1 job
 
   cat > "$tmp.manifest" <<EOF
 date=$NOW
-host=$(hostname -s)
+# Injected by the facade; `hostname` is NOT in the systemd PATH.
+host="${STATEBACKUP_HOSTNAME:-$(hostname -s)}"
 git_rev=$GITREV
 job=$job
 EOF
