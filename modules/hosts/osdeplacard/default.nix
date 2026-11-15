@@ -26,6 +26,7 @@
       sops
       homepage
       solidcraft
+      gridfinity
     ]) ++ [{
       myConfig.power = {
         enable = true;

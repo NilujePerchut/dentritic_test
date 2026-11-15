@@ -14,5 +14,10 @@
     system.stateVersion = lib.mkForce "24.05";
 
     services.solidcraftWeb.enable = true;
+    services.gridfinity = {
+      enable = true;
+      port = 8096;
+    };
+
   };
 }

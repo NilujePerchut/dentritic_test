@@ -93,6 +93,14 @@
                     description = "Parametric 3D CAD (browser)";
                   };
                 }
+                {
+                  Gridfinity = {
+                    abbr = "GF";
+                    href = "http://192.168.40.43:8096";
+                    icon = "assetgrid.png";
+                    description = "Gridfinity module generator";
+                  };
+                }
               ];
             }
             {
