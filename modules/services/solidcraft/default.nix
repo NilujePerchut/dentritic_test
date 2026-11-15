@@ -24,7 +24,7 @@
             url = "https://github.com/tangency-labs/solidcraft/releases/download/v${cfg.version}/solidcraft-web-${cfg.version}.zip";
             # SHA256 of the release zip (v0.30.1, from the release assets).
             # Update together with `version` (see scripts/update-solidcraft.sh).
-            sha256 = "acaa73a5638206cf123c56b4c0a5113c83a8bf0149dee6a66b929b00fe444403";
+            sha256 = "ba64590abf6b29c4f1aa7c1696885210274333ba29c2f46f2160a40ca89f6eed";
           };
           nativeBuildInputs = [ pkgs.unzip ];
           installPhase = ''
@@ -65,7 +65,7 @@
 
           version = lib.mkOption {
             type = lib.types.str;
-            default = "0.30.1"; # solidcraft pin
+            default = "0.42.0"; # solidcraft pin
             description = "SolidCraft release version to serve (must exist as a GitHub release).";
           };
 
