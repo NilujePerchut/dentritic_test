@@ -59,7 +59,7 @@ grep -q '# solidcraft pin' "$MODULE" \
 
 # --- 4. Rewrite the pin -----------------------------------------------------
 sed -i -E \
-  "s|default = \"[^\"]*\";(# solidcraft pin)|default = \"${version}\";\1|" "$MODULE"
+  "s|default = \"[^\"]*\"; ?# solidcraft pin|default = \"${version}\"; # solidcraft pin|" "$MODULE"
 sed -i -E \
   "s|sha256 = \"[0-9a-f]{64}\";|sha256 = \"${sha}\";|" "$MODULE"
 
