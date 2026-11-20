@@ -24,13 +24,21 @@
         };
 
         # Data disks (NAS)
-        "/mnt/data1" = {device = "/dev/disk/by-label/disk1"; fsType = "ext4";};
-        "/mnt/data2" = {device = "/dev/disk/by-label/disk2"; fsType = "ext4";};
-        "/mnt/data3" = {device = "/dev/disk/by-label/disk3"; fsType = "ext4";};
+        "/mnt/data1" = {device = "/dev/disk/by-label/disk1"; fsType = "ext4";
+                        options = ["nofail" "x-systemd.device-timeout=60s"];};
+
+        "/mnt/data2" = {device = "/dev/disk/by-label/disk2"; fsType = "ext4";
+                        options = ["nofail" "x-systemd.device-timeout=60s"];};
+
+        "/mnt/data3" = {device = "/dev/disk/by-label/disk3"; fsType = "ext4";
+                        options = ["nofail" "x-systemd.device-timeout=60s"];};
 
         # Parity disks (SnapRAID)
-        "/mnt/parity1" = {device = "/dev/disk/by-label/disk4"; fsType = "ext4";};
-        "/mnt/parity2" = {device = "/dev/disk/by-label/disk5"; fsType = "ext4";};
+        "/mnt/parity1" = {device = "/dev/disk/by-label/disk4"; fsType = "ext4";
+                          options = ["nofail" "x-systemd.device-timeout=60s"];};
+
+        "/mnt/parity2" = {device = "/dev/disk/by-label/disk5"; fsType = "ext4";
+                          options = ["nofail" "x-systemd.device-timeout=60s"];};
       };
 
       networking.useDHCP = lib.mkDefault true;
