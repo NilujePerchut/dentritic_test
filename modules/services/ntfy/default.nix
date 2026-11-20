@@ -64,9 +64,23 @@
       # Testable standalone: ntfy-failure-notify snapraidd.service urgent </dev/null
       failureNotify = pkgs.writeShellScriptBin "ntfy-failure-notify" ''
         set -eu
+        export PATH="${pkgs.coreutils}/bin"
         unit="''${1:?failed unit name required}"
         prio="''${2:-urgent}"
         host="${config.networking.hostName}"
+        # ─── Dedup (incident 2026-11-18/20) ───
+        # Safety net for the cases the start-limit does not cover
+        # (a timer failing on every run, an external restart...): at
+        # most one notification per unit every 6 h. Marker lives in
+        # tmpfs (/run, wiped on reboot): the next incident after a
+        # reboot or 6 h notifies normally.
+        markerDir=/run/ntfy-failure-notified
+        marker="$markerDir/$unit"
+        if [ -f "$marker" ] && [ $(( $(date +%s) - $(date -r "$marker" +%s) )) -lt 21600 ]; then
+          exit 0
+        fi
+        mkdir -p "$markerDir"
+        touch "$marker"
         ${ntfySend}/bin/ntfy-send ${cfg.failureNotify.topic} "$prio" <<EOF
         Service $unit failed on $host.
         Investigate: journalctl -u "$unit" -e
@@ -243,7 +257,27 @@
               # %N = unit name WITHOUT the type suffix. With %n
               # ("statebackup.service") the template re-appended ".service"
               # → instance "ntfy-failure@statebackup.service.service".
-              unitConfig.OnFailure = "ntfy-failure@%N.service";
+              unitConfig = {
+                OnFailure = "ntfy-failure@%N.service";
+
+                # ─── Crash-loop guard (incident 2026-11-18/20) ───
+                # Without these limits, a Restart=always unit whose root
+                # cause persists (e.g. data2 stuck in emergency_ro) spaces
+                # its restarts more than 30 s apart → the default start
+                # counter resets to zero every time → the limit is never
+                # hit → 57 consecutive failures, each one firing the
+                # OnFailure net.
+                # Here: 3 failed attempts within 5 min → the unit goes
+                # DEFINITIVELY to failed, the net fires 1 notification,
+                # and silence falls. Manual recovery after fixing:
+                #   systemctl reset-failed <unit> && systemctl start <unit>
+                # mkForce: watched units may carry upstream start-limit
+                # values (e.g. postgresql sets StartLimitBurst = 5) with
+                # default priority — this module owns the crash-loop
+                # policy, so its values must win the merge.
+                StartLimitIntervalSec = lib.mkForce "5min";
+                StartLimitBurst = lib.mkForce 3;
+              };
             })
           ))
         ];
