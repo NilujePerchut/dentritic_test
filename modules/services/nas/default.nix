@@ -125,9 +125,9 @@
           };
 
           lanCidr = lib.mkOption {
-            type = lib.types.str;
-            default = "192.168.40.0/24";
-            description = "Allowed network";
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Allowed network. null disables net_acl to accept all clients";
           };
 
           fullConfigAccess = lib.mkOption {
@@ -245,7 +245,8 @@
         environment.etc."snapraidd.conf".text = ''
           net_enabled = 1
           ${listenLine}
-          net_acl = +127.0.0.1,+${cfg.snapraidd.lanCidr}
+          ${lib.optionalString (cfg.snapraidd.lanCidr != null)
+            "net_acl = +127.0.0.1,+${cfg.snapraidd.lanCidr}\n"}
           net_config_full_access = ${if cfg.snapraidd.fullConfigAccess then "1" else "0"}
           sys_log_retention_days = 120
           net_web_root = ${snapraidd}/share/snapraidd/commander.zip
