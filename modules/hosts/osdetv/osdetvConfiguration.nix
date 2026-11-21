@@ -1,4 +1,5 @@
 {
+  self,
   moduleWithSystem,
   ...
 }: {
@@ -54,6 +55,24 @@
           };
         };
       };
+
+      # ── Rescue access (incident 2026-11-18/20) ──
+      # Emergency mode spawns a sulogin shell that REQUIRES the root
+      # password. Without one, a stuck boot is a locked door: no
+      # console, no SSH. The hash lives in sops (never the plaintext).
+      # neededForUsers = true is NOT optional: user activation runs
+      # BEFORE the regular sops service, so without this flag the
+      # hash file would not exist when /etc/shadow is written. Once
+      # written into /etc/shadow, the hash survives any later boot,
+      # including emergency mode (root fs intact: only a DATA mount
+      # failed — nofail keeps the system up for everything else).
+      sops.secrets."root-hash" = {
+        sopsFile = "${self}/secrets/root-hash.sops.yaml";
+        key = "root-hash";
+        neededForUsers = true;
+      };
+
+      users.users.root.hashedPasswordFile = config.sops.secrets."root-hash".path;
 
       services.ntfy.enable = true;
       services.ntfy.failureNotify = {
