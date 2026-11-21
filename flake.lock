@@ -79,11 +79,11 @@
     "niluje-configs": {
       "flake": false,
       "locked": {
-        "lastModified": 1792445035,
-        "narHash": "sha256-DN6qWKukCqMaAiL6jgKj7j38AI7LNElDQYZLhN4BVCE=",
+        "lastModified": 1794916320,
+        "narHash": "sha256-DoG+gVNxXmBuCHKGJly3wP/8dBvxtdSqqinrtBzkSy4=",
         "owner": "NilujePerchut",
         "repo": "configs",
-        "rev": "92a4c15fdbd80be3d0ec52cc224b7cdce9533a6a",
+        "rev": "7be8fc2bb63b0ae6f89f4890d92005124a44778a",
         "type": "github"
       },
       "original": {
