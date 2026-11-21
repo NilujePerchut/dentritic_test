@@ -115,6 +115,16 @@
         notify = true;
       };
 
+      services.nasCheck.smartDisks = [
+        "/dev/disk/by-label/disk1"
+        "/dev/disk/by-label/disk2"
+        "/dev/disk/by-label/disk3"
+        "/dev/disk/by-label/disk4"
+        "/dev/disk/by-label/disk5"
+      ];
+      services.nasCheck.checks = ["netdata" "pool" "services" "snapraid"
+                                  "backups" "smart"];
+
       services.navidromeNas = {
         enable = true;
         musicFolder = "/mnt/mergerfs/partage/music";

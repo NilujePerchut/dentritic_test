@@ -22,7 +22,7 @@
           # non-ASCII message strings (accents, emoji) in the build
           # environment (no locale). We keep the same dependency
           # isolation with an explicit PATH.
-          export PATH="${lib.makeBinPath [pkgs.curl pkgs.jq pkgs.systemd pkgs.gawk pkgs.inetutils]}:$PATH"
+          export PATH="${lib.makeBinPath [ pkgs.curl pkgs.jq pkgs.systemd pkgs.gawk pkgs.inetutils pkgs.smartmontools]}:$PATH"
 
           # ─── Runtime configuration injected by the facade ───
           export NASCHECK_NETDATA_URL="${cfg.netdataUrl}"
@@ -40,6 +40,8 @@
           export NASCHECK_CHECKS="${lib.concatStringsSep " " cfg.checks}"
           export NASCHECK_JOURNAL_HOURS="${toString cfg.journalHours}"
           export NASCHECK_BACKUPS="${config.services.stateBackup.backupsDir}"
+          export NASCHECK_SMART_DISKS="${lib.concatStringsSep " " cfg.smartDisks}"
+          export NASCHECK_SMART_STATE="${cfg.smartStateDir}"
           ${script}
       '';
 
@@ -85,8 +87,27 @@
           description = "snapraidd systemd unit name for journal inspection";
         };
 
+        # ─── SMART link-quality check (daily UDMA_CRC delta) ───
+        smartDisks = lib.mkOption {
+          type = lib.types.listOf lib.types.str;
+          default = [];
+          example = ["/dev/disk/by-label/disk2"];
+          description = ''
+            Devices monitored by the smart check (UDMA_CRC_Error_Count,
+            attribute 199). Empty list = check skipped on this host.
+            Use /dev/disk/by-label/ paths: stable across SATA reordering.
+          '';
+        };
+
+        smartStateDir = lib.mkOption {
+          type = lib.types.str;
+          default = "/var/lib/nas-check";
+          description = "Where the smart check persists its CRC baseline
+                         between digests";
+        };
+
         checks = lib.mkOption {
-          type = lib.types.listOf (lib.types.enum ["netdata" "pool" "services" "snapraid" "backups"]);
+          type = lib.types.listOf (lib.types.enum ["netdata" "pool" "services" "snapraid" "backups" "smart"]);
           default = ["netdata" "pool" "services" "snapraid" "backups"];
           description = ''
             Groups run by the daily digest (nas-check all). Remove the
@@ -118,6 +139,9 @@
           wants = ["network-online.target"];
           serviceConfig = {
             Type = "oneshot";
+            # StateDirectory binds the smart CRC baseline to the *service*,
+            # surviving rebuilds; the smart check writes there at each digest.
+            StateDirectory = "nas-check";
             # exit 1 = "problems found" is the script's documented contract,
             # not a service crash: without this, every digest with problems leaves
             # the unit in 'failed' state → the 'services' check counts it the next

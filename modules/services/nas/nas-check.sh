@@ -22,6 +22,8 @@ NOTIFY="${NASCHECK_NOTIFY:-0}"   # send policy (facade `notify` option)
 CHECKS="${NASCHECK_CHECKS:-netdata pool services snapraid}"  # groups run by `all`
 HOURS="${NASCHECK_JOURNAL_HOURS:-24}"  # journal inspection window
 BACKUPS="${NASCHECK_BACKUPS:-/mnt/mergerfs/server/backups}"
+SMART_DISKS="${NASCHECK_SMART_DISKS:-}"
+SMART_STATE="${NASCHECK_SMART_STATE:-/var/lib/nas-check}"
 host=$(hostname -s)
 
 usage() {
@@ -53,7 +55,7 @@ group="all"
 while [ $# -gt 0 ]; do
   case "$1" in
     -n|--notify) NOTIFY=1 ;;
-    all|netdata|pool|services|snapraid|backups) group="$1" ;;
+	all|netdata|pool|services|snapraid|backups|smart) group="$1" ;;
     help|-h|--help) usage; exit 0 ;;
     list) echo "available groups: all $CHECKS"; exit 0 ;;
     *) usage; exit 2 ;;
@@ -90,6 +92,42 @@ check_netdata() {
     echo "netdata: OK — no active alarms"
   fi
 }
+
+# ─── check: SATA link quality — daily UDMA_CRC delta per disk ───
+# Absolute counters are meaningless for alerting (disk2 keeps its 32
+# forever — incident 2026-11-18/20). The SIGNAL is a delta since the
+# previous digest: (re)mounting a degraded cable/contact shows up here
+# within 24h. Bonus side effect: a disk that cannot be read (absent,
+# dead) is reported too — with nofail mounts, the digest becomes the
+# daily presence check of the whole array.
+check_smart() {
+  if [ -z "$SMART_DISKS" ]; then
+    echo "smart: OK — no disks configured, check skipped"
+    return
+  fi
+  local dev label crc prev new_state=""
+  mkdir -p "$SMART_STATE"
+  local state_file="$SMART_STATE/crc.state"
+  for dev in $SMART_DISKS; do
+    label=$(basename "$dev")
+    crc=$(smartctl -A "$dev" 2>/dev/null | awk '$1 == 199 {print $10 + 0}')
+    if [ -z "$crc" ]; then
+      problems+=("smart: cannot read CRC counter of $label (absent disk?)")
+      continue
+    fi
+    prev=$(awk -v l="$label" '$1 == l {print $2}' "$state_file" 2>/dev/null)
+    if [ -n "$prev" ] && [ "$crc" -gt "$prev" ]; then
+      problems+=("smart: +$((crc - prev)) UDMA_CRC on $label — SATA link/cable degrading")
+    fi
+    new_state="$new_state$label $crc
+"
+  done
+  # New baseline for tomorrow's delta (nv: atomic as we can get in sh)
+  if [ -n "$new_state" ]; then
+    printf '%s' "$new_state" > "$state_file.new" && mv "$state_file.new" "$state_file"
+  fi
+  [ ${#problems[@]} -eq 0 ] && echo "smart: OK — no CRC growth on $(printf '%s ' $SMART_DISKS | wc -w) disk(s)"
+ }
 
 # ─── check: pool fill level (the data invariant) ───
 check_pool() {
@@ -161,7 +199,7 @@ check_backups() {
 
 # ─── Run ───
 case "$group" in
-  netdata|pool|services|snapraid|backups)
+  netdata|pool|services|snapraid|backups|smart)
     # Capture the check output for the -n notification. The check runs in
     # the current shell (no subshell) so the `problems` array keeps its
     # findings; output goes to a temp file, then is displayed locally.
