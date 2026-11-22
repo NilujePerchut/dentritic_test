@@ -135,8 +135,8 @@
 
         systemd.services.nas-check = {
           description = "NAS daily digest";
-          after = ["network-online.target"];
-          wants = ["network-online.target"];
+          after = ["network-online.target" "netdata.service" ];
+          wants = ["network-online.target" "netdata.service" ];
           serviceConfig = {
             Type = "oneshot";
             # StateDirectory binds the smart CRC baseline to the *service*,
