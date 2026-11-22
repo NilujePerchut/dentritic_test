@@ -69,12 +69,18 @@
             type = types.path;
             description = ''
               Runtime path of the ntfy token (sops). Must be readable by
-              the netdata user — e.g. sops.secrets.<name>.group = "nogroup";
-              mode 0440 with netdata added to group nogroup.
+              the netdata user — e.g. sops.secrets.<name>.group set to
+              notifications.tokenGroup (default "nas-alerts"), mode 0440,
+              with netdata added to that group by this facade.
             '';
           };
-        };
 
+          tokenGroup = mkOption {
+            type = types.str;
+            default = "nas-alerts";
+            description = "Group holding read access to the ntfy token (sops secret mode 0440). netdata is added to it by the facade.";
+          };
+        };
         # Extra alarm definitions, e.g. healthRules."smart-temp.conf" = '''...''';
         healthRules = mkOption {
           type = types.attrsOf types.lines;
@@ -117,9 +123,10 @@
               cfg.healthRules;
         };
 
-        # The sops token is exposed group=nogroup mode 0440 (same convention as
-        # snapraidd): grant the netdata agent read access via group membership.
-        users.users.netdata.extraGroups = ["nogroup"];
+        # The sops token is exposed via the dedicated token group, mode 0440
+        # (same group as the snapraidd worker): grant the netdata agent read
+        # access through group membership.
+        users.users.netdata.extraGroups = [cfg.notifications.tokenGroup];
       };
     });
 }

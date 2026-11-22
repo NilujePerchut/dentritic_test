@@ -80,8 +80,13 @@
                   "immich-machine-learning" "redis-immich" "statebackup" ];
       };
 
+      # Dedicated group for reading the ntfy token (0440): members are the
+      # snapraidd worker (drops to nobody at runtime, uid 65534) and the
+      # netdata agent. Replaces the previous nogroup-wide convention.
+      users.groups.nas-alerts = { };
+      users.users.nobody.extraGroups = [ "nas-alerts" ];
       sops.secrets."ntfy-token" = {
-        group = "nogroup";
+        group = "nas-alerts";
         mode = "0440";
       };
 
