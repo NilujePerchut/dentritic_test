@@ -33,6 +33,8 @@
 
       myConfig.gnome.gsconnect = true;
 
+      myConfig.hyprland.enable = true;
+      myConfig.niri.enable = true;
 
       system.stateVersion = lib.mkForce "26.05";
     });

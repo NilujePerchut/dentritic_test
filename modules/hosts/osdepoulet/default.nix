@@ -32,6 +32,8 @@
         prog
         zsh
         elec
+        hyprland
+        niri
       ])
       ++ [{
         myConfig.power = {
