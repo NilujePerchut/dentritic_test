@@ -23,8 +23,19 @@
           options = [ "fmask=0022" "dmask=0022" ];
         };
 
-      swapDevices = [ ];
+      # Swap partition (hibernation): dedicated 40 GiB partition after root
+      # (nvme0n1p3). Deterministic resume: header at block 0, no resume_offset.
+      # 40 GiB = 32 GiB RAM x 1.25 (hibernation image must fit in swap).
+      swapDevices = [
+        { device = "/dev/disk/by-uuid/ed10283c-4d82-480b-861d-930f0832e15c"; }
+      ];
+
+      boot.kernelParams = [ "resume=UUID=ed10283c-4d82-480b-861d-930f0832e15c" ];
 
       networking.useDHCP = lib.mkDefault true;
+
+      # Home Manager must not touch the existing Firefox profile
+      # (managed profile "niluje" would shadow the legacy "default" one).
+      home-manager.users.niluje.programs.firefox.enable = lib.mkForce false;
   });
 }
