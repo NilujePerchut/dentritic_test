@@ -1,5 +1,5 @@
 {moduleWithSystem, ...}: {
-  flake.nixosModules.network = moduleWithSystem ({pkgs, ...}: {config, ...}: {
+  flake.nixosModules.network = moduleWithSystem ({pkgs, ...}: {config, lib, ...}: {
     networking = {
       networkmanager = {
         enable = true;
@@ -13,7 +13,7 @@
        "1.1.1.1"
        "8.8.8.8"
       ];
-      firewall.enable = false;
+      firewall.enable = lib.mkDefault false;
       wireguard.enable = true;
     };
 
